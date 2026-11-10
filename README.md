@@ -4,6 +4,8 @@
 
 English | [繁體中文](README.zh-TW.md)
 
+Read the introduction: [Codex Dev Team: One Codex, Multiple Claude Sessions, One Shared Goal](https://blog.sd0x.dev/blog/codex-dev-team-en/) — the workflow, intended audience, and practical examples.
+
 Codex handles scope, architecture, dependencies, and integration acceptance. Claude Code handles implementation, tests, and review/verification through the **required [sd0x-harness](https://github.com/sd0xdev/sd0x-harness) Claude Code plugin**.
 
 Start with one Claude conversation for a focused task. Add more when the work spans **related features or components that need joint integration**—for example, a web app, API service, and shared SDK across three repositories. Keep unrelated work in separate Codex conversations.

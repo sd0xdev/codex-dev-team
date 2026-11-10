@@ -4,6 +4,8 @@
 
 [English](README.md) | 繁體中文
 
+完整介紹：[Codex Dev Team：讓一個 Codex，帶一組 Claude 完成同一件事](https://blog.sd0x.dev/blog/codex-dev-team/) — 了解工作方式、適用對象與實際使用場景。
+
 Codex 負責需求、架構、任務拆分、依賴協調與整合驗收；Claude Code 負責實作、測試，以及透過必要的 **[sd0x-harness Claude Code plugin](https://github.com/sd0xdev/sd0x-harness)** 完成獨立 review 與 verify。
 
 簡單任務先用一個 Claude 對話。當工作涉及**相關功能、需要聯調的元件，或多個專案的串接**時，再由同一個 Codex PM 管理多個 Claude 對話。不相關的工作建議分開 Codex 對話，避免需求與決策混在一起。
