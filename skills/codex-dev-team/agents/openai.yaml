@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: MPL-2.0
+interface:
+  display_name: "Codex Dev Team"
+  short_description: "Coordinate Claude teams with sd0x-harness"
