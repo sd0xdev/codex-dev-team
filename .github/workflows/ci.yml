@@ -7,9 +7,18 @@ permissions:
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python: ['3.9', '3.12']
+        include:
+          # Python 3.9 is unavailable on Ubuntu 26.04 and macOS arm64.
+          - os: ubuntu-24.04
+            python: '3.9'
+          - os: macos-15-intel
+            python: '3.9'
+          - os: ubuntu-latest
+            python: '3.12'
+          - os: macos-latest
+            python: '3.12'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
