@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-11-16
 
 - Add shared data ownership and write/query/event tracing, including access eligibility versus query scope.
 - Add lightweight external team ledger and exact-combination integration record templates, selective contract-change revalidation, and recovery checkpoints.

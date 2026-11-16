@@ -37,7 +37,7 @@ Codex's available `skill-creator/scripts/quick_validate.py` accepted the revised
 
 An isolated installation check installed the baseline package, added a synthetic local customization, and exercised overwrite refusal, explicit update dry-run, update with preserved backup, fresh install and idempotent reinstall. All 15 packaged files and executable bits matched the revised source, including the new templates/example. No installed private skill was changed. Relative Markdown links, the acceptance anchor, license notices and `git diff --check` were checked separately.
 
-CI must be checked on the exact pushed commit; a local pass is not CI evidence. This report does not claim deployment, production behavior, or a new release. `VERSION` and release tags remain unchanged; the changelog entry is Unreleased.
+CI must be checked on the exact pushed commit; a local pass is not CI evidence. At the time of this coordination-change validation, `VERSION` and release tags were unchanged and the changelog entry was Unreleased. Subsequent release preparation records its own version, CI and tagged-install checks. This walkthrough does not establish deployment or production behavior.
 
 ## Coverage limits
 

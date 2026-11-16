@@ -34,13 +34,13 @@ In Codex, you can ask the built-in installer:
 
 ```text
 Use $skill-installer to install the skill at
-https://github.com/sd0xdev/codex-dev-team/tree/v0.1.0/skills/codex-dev-team
+https://github.com/sd0xdev/codex-dev-team/tree/v0.2.0/skills/codex-dev-team
 ```
 
 Or install a versioned checkout yourself:
 
 ```bash
-git clone --branch v0.1.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
+git clone --branch v0.2.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
 cd codex-dev-team
 python3 install.py
 ```
@@ -86,7 +86,7 @@ Codex records a mission, verifies prerequisites, and starts an owned tmux/Remote
 
 For teams sharing data, contracts, or service dependencies, the PM keeps one external [team ledger](skills/codex-dev-team/assets/templates/team-ledger.md), while canonical architecture/contracts and durable product handover notes stay in their repos. Reuse existing records rather than duplicate them. Track data ownership and actual write/query/event paths, each team's adopted contract and revision, and a named owner's [integration record](skills/codex-dev-team/assets/templates/integration-record.md) for the exact tested combination.
 
-Contract changes invalidate only affected evidence for the new target, preserving historical results; updates are delivered at the existing safe session boundaries. Recovery reconciles the ledger with original session metadata and evidence before any dispatch. Small single-repo changes still use only the ordinary mission/handoff. See the [coordination procedure](skills/codex-dev-team/references/team-coordination.md), [complete synthetic example](skills/codex-dev-team/references/team-example.md), and [document walkthrough results](docs/coordination-validation.md). These additions are on `main`; the pinned v0.1.0 installation above remains the released snapshot.
+Contract changes invalidate only affected evidence for the new target, preserving historical results; updates are delivered at the existing safe session boundaries. Recovery reconciles the ledger with original session metadata and evidence before any dispatch. Small single-repo changes still use only the ordinary mission/handoff. See the [coordination procedure](skills/codex-dev-team/references/team-coordination.md), [complete synthetic example](skills/codex-dev-team/references/team-example.md), and [document walkthrough results](docs/coordination-validation.md). These coordination resources are included in v0.2.0; the installation commands above select that release.
 
 ## Scenarios and examples
 
