@@ -82,6 +82,12 @@ Review the final handoff and evidence. Do not push or deploy.
 
 Codex records a mission, verifies prerequisites, and starts an owned tmux/Remote Control session. It checks the actual session and model before dispatching. Claude implements and completes its harness loop. Codex then checks the final diff, gate evidence, and acceptance criteria. RC can remain available for you to inspect the conversation. If you explicitly choose non-RC execution, the helper supports recorded print-mode runs.
 
+## Coordination records
+
+For teams sharing data, contracts, or service dependencies, the PM keeps one external [team ledger](skills/codex-dev-team/assets/templates/team-ledger.md), while canonical architecture/contracts and durable product handover notes stay in their repos. Reuse existing records rather than duplicate them. Track data ownership and actual write/query/event paths, each team's adopted contract and revision, and a named owner's [integration record](skills/codex-dev-team/assets/templates/integration-record.md) for the exact tested combination.
+
+Contract changes invalidate only affected evidence for the new target, preserving historical results; updates are delivered at the existing safe session boundaries. Recovery reconciles the ledger with original session metadata and evidence before any dispatch. Small single-repo changes still use only the ordinary mission/handoff. See the [coordination procedure](skills/codex-dev-team/references/team-coordination.md), [complete synthetic example](skills/codex-dev-team/references/team-example.md), and [document walkthrough results](docs/coordination-validation.md). These additions are on `main`; the pinned v0.1.0 installation above remains the released snapshot.
+
 ## Scenarios and examples
 
 These are example workflows, not claims of benchmark results or completed customer projects.
