@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Add opt-in user-configured stage and quota model selection shared by launch/resume, with explicit overrides and legacy fallback.
+- Record selection provenance, handle stale usage and exhausted shared quota, and preserve session/readback, effort and permission safeguards.
+- Include a minimal policy template, bilingual setup guidance and offline custom-model continuation regressions.
+
 ## 0.2.0 — 2026-11-16
 
 - Add shared data ownership and write/query/event tracing, including access eligibility versus query scope.

@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 # Run and resume a Claude conversation
 
-Requires macOS or Linux, Python 3.9+, Git, tmux, and an authenticated Claude Code CLI. Check `claude --help` for the requested model, permission mode, RC, and effort support. Models are account-dependent; select an explicit full model ID rather than copying a fixed recommendation. Effort is optional and otherwise follows CLI behavior. The full sd0x-harness setup is required for product development; setup-only runs may precede it.
+Requires macOS or Linux, Python 3.9+, Git, tmux, and an authenticated Claude Code CLI. Check `claude --help` for the requested model, permission mode, RC, and effort support. Models are account-dependent; use full model IDs selected by the user or their optional local policy. Effort is optional and otherwise follows CLI behavior. The full sd0x-harness setup is required for product development; setup-only runs may precede it.
 
 Use absolute paths. Examples below contain placeholders; resolve them before execution. `H` points into this installed skill, not a product repo.
 
@@ -12,6 +12,8 @@ python3 "$H" launch \
   --model '<full-model-id>' --permission-mode '<supported-mode>' \
   --runs-root '<dedicated-external-runs-directory>' --task-name api
 ```
+
+For opt-in stage/quota selection, read [model-selection.md](model-selection.md). Replace `--model` with `--model-policy <absolute-file> --stage <stage>` or configure `CODEX_DEV_TEAM_MODEL_POLICY` once and supply the stage. Explicit `--model` overrides matching quota and stage rules. Missing usage falls back to the stage; known exhausted shared quota blocks dispatch preparation. No configured match preserves legacy selection.
 
 Each launch/resume creates a new private directory containing a mission, script, and metadata. `--prepare-only` generates files without starting a process; it is not a queued launch and cannot be resumed as though it had run. Inspect it and issue a new launch when ready. The run directory records the actual socket, session, pane, repo fingerprint, requested settings, and CLI version. Keep these artifacts local: missions, terminal captures, URLs, and logs may contain private project information.
 
@@ -53,7 +55,7 @@ To resume after that process exits:
 python3 "$H" resume --from '<previous-run-dir>' --mission '<revision-file>'
 ```
 
-The helper inherits recorded model, effort, permission mode, socket, PATH additions, and allowed directories. It rejects a live/prepared prior run and uses the exact recorded session ID. For an unknown prior state, verify no process still owns the conversation before `--ack-unknown-prior`. A resumed RC run needs fresh readback and dispatch. `--setenv` values are not inherited; supply only non-secret settings again if needed. Do not use `--continue` or fork an unrelated session.
+Without an applicable model rule or explicit override, the helper inherits the recorded model. It always preserves the existing inheritance of effort, permission mode, socket, PATH additions, and allowed directories. Configured resumes re-read the recorded policy path and current usage; pass `--stage` for the current mission, since stages are not inherited. See [model selection](model-selection.md#same-session-continuation) for a same-session research → development → acceptance example. It rejects a live/prepared prior run and uses the exact recorded session ID. For an unknown prior state, verify no process still owns the conversation before `--ack-unknown-prior`. A resumed RC run needs fresh readback and dispatch. `--setenv` values are not inherited; supply only non-secret settings again if needed. Do not use `--continue` or fork an unrelated session.
 
 When the user chooses non-RC execution, add `--no-rc-reason '<recorded user choice>'` to each launch/resume. This sends the mission in print mode and records stream JSON plus an exit marker. It is not a fallback for failed RC. `exited_ok` means the process completed normally, not that acceptance passed. Interactive processes can remain alive for RC after finishing their work.
 

@@ -15,6 +15,9 @@ import claude_run as cr
 
 class RemoteControlTests(unittest.TestCase):
     def setUp(self):
+        policy_env = patch.dict(os.environ, {cr.POLICY_ENV: ""})
+        policy_env.start()
+        self.addCleanup(policy_env.stop)
         self.tmp = tempfile.TemporaryDirectory(prefix='dev-team-test-')
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name).resolve()

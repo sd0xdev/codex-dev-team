@@ -4,7 +4,7 @@
 Print mode requires an explicit, user-authorized --no-rc-reason.
 
 Subcommands:
-  launch  --repo R --mission M --runs-root D --model ID --permission-mode MODE [--effort LEVEL] [options]
+  launch  --repo R --mission M --runs-root D [--model ID | --stage STAGE --model-policy FILE] --permission-mode MODE [--effort LEVEL] [options]
   resume  --from RUN_DIR --mission M [options]
   dispatch RUN_DIR --remote-url URL --actual-model ID --confirm-rc-active-and-idle
   status  RUN_DIR [--json] [--result-chars N]
@@ -18,6 +18,7 @@ helper never runs kill-server.
 process, exit 0 or Claude's own prose as acceptance.
 """
 import argparse
+from model_policy import POLICY_ENV, STAGES, PolicyError, select_model
 import pwd
 import socket as host_socket
 import uuid
@@ -284,6 +285,7 @@ def status(run_dir, result_chars=0):
         "exit": exit_info, "tmux_socket": meta.get("tmux_socket"), "tmux_session": meta.get("tmux_session"), "tmux_alive": alive,
         "requested_model": requested, "actual_model": actual, "model_match": model_match,
         "requested_effort": meta.get("requested_effort"),
+        "model_selection": meta.get("model_selection"),
         "session_id": stream["session_id"], "resumed_from_session": meta.get("resume_session_id"),
         "claude_code_version": stream["claude_code_version"], "permission_mode": stream["permission_mode"],
         "result_events": stream["result_events"], "final_result": final,
@@ -383,6 +385,7 @@ def prepare_and_start(a, kind, repo, model, resume_session=None, parent_run=None
         "no_rc_reason": a.no_rc_reason,
         "run_id": run_id, "kind": kind, "created_at": now(), "run_dir": str(run_dir),
         "fingerprint": fp, "tmux_socket": str(socket), "tmux_session": tmux_name, "requested_model": model, "requested_effort": effort,
+        "model_selection": getattr(a, "model_selection", None),
         "permission_mode": a.permission_mode, "claude_bin": claude_bin, "claude_version": version,
         "path_prepend": a.path_prepend, "add_dirs": [str(Path(d).resolve()) for d in a.add_dir],
         "setenv_names": [k for k, _ in a.setenv], "resume_session_id": resume_session,
@@ -398,7 +401,7 @@ def prepare_and_start(a, kind, repo, model, resume_session=None, parent_run=None
         write_new(tmp, json.dumps(meta, indent=2, ensure_ascii=False))
         os.replace(tmp, meta_path)
     print(json.dumps({"run_dir": str(run_dir), "tmux_socket": str(socket), "tmux_session": tmux_name, "started": meta["started"],
-                      "requested_model": model, "resume_session_id": resume_session,
+                      "requested_model": model, "model_selection": meta["model_selection"], "resume_session_id": resume_session,
                       "mode": meta["mode"], "mission_sent": meta["started"] and not interactive, "rc_verified": False}, ensure_ascii=False))
 
 
@@ -457,13 +460,31 @@ def parse_setenv(values):
     return out
 
 
+def resolve_model(a, prior_meta=None):
+    prior_meta = prior_meta or {}
+    prior_selection = prior_meta.get("model_selection") or {}
+    policy_path = None if a.no_model_policy else (
+        a.model_policy or prior_selection.get("policy_path") or os.environ.get(POLICY_ENV))
+    try:
+        model, a.model_selection = select_model(
+            explicit=a.model, stage=a.stage, policy_path=policy_path,
+            previous=prior_meta.get("requested_model"))
+    except PolicyError as exc:
+        die(exc.code, str(exc))
+    return model
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     def common(p, resume):
         p.add_argument("--mission", required=True, help="mission saved locally; interactive mode waits for dispatch")
-        p.add_argument("--model", required=not resume, help="explicit full model ID; resume inherits the recorded choice")
+        p.add_argument("--model", help="explicit full model ID, overrides quota/stage selection")
+        p.add_argument("--stage", choices=STAGES, help="current work stage; not inherited on resume")
+        policy = p.add_mutually_exclusive_group()
+        policy.add_argument("--model-policy", help="local JSON policy; resume reuses its recorded path, then environment")
+        policy.add_argument("--no-model-policy", action="store_true", help="disable configured selection for this run; restore legacy model behavior")
         p.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"],
                        default=None, help="optional effort; omit to use CLI defaults, resume inherits recorded effort")
         p.add_argument("--runs-root", required=not resume, help="parent of run directories (outside the repo or git-ignored)")
@@ -513,7 +534,8 @@ def main():
 
     a.setenv = parse_setenv(a.setenv)
     if a.cmd == "launch":
-        prepare_and_start(a, "launch", Path(a.repo), a.model)
+        model = resolve_model(a)
+        prepare_and_start(a, "launch", Path(a.repo), model)
         return
     prior_dir = Path(a.from_run).resolve()
     prior = status(prior_dir)
@@ -536,7 +558,8 @@ def main():
     missing_env = sorted(set(meta.get("setenv_names") or []) - {k for k, _ in a.setenv})
     if missing_env:
         print(f"WARNING: prior run set {missing_env}; resume does not reuse --setenv values, pass --setenv again if still needed", file=sys.stderr)
-    prepare_and_start(a, "resume", Path(meta["fingerprint"]["repo"]), a.model or meta["requested_model"],
+    model = resolve_model(a, meta)
+    prepare_and_start(a, "resume", Path(meta["fingerprint"]["repo"]), model,
                       resume_session=prior["session_id"], parent_run=str(prior_dir))
 
 
