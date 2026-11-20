@@ -34,13 +34,13 @@ In Codex, you can ask the built-in installer:
 
 ```text
 Use $skill-installer to install the skill at
-https://github.com/sd0xdev/codex-dev-team/tree/v0.2.0/skills/codex-dev-team
+https://github.com/sd0xdev/codex-dev-team/tree/v0.3.0/skills/codex-dev-team
 ```
 
 Or install a versioned checkout yourself:
 
 ```bash
-git clone --branch v0.2.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
+git clone --branch v0.3.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
 cd codex-dev-team
 python3 install.py
 ```
@@ -84,7 +84,7 @@ Codex records a mission, verifies prerequisites, and starts an owned tmux/Remote
 
 ## Optional automatic model selection
 
-**Unreleased:** this section describes the next version; the pinned v0.2.0 install above does not include it. For review, install the PR branch into an isolated skills root.
+Available in **v0.3.0**, selected by the installation commands above.
 
 Configure once with the [minimal JSON template](skills/codex-dev-team/assets/model-policy.example.json), replacing the placeholder IDs with models available to you. Keep it outside the skill and product repos, then set:
 
@@ -104,7 +104,7 @@ The guide also demonstrates the same recorded session progressing through **rese
 
 For teams sharing data, contracts, or service dependencies, the PM keeps one external [team ledger](skills/codex-dev-team/assets/templates/team-ledger.md), while canonical architecture/contracts and durable product handover notes stay in their repos. Reuse existing records rather than duplicate them. Track data ownership and actual write/query/event paths, each team's adopted contract and revision, and a named owner's [integration record](skills/codex-dev-team/assets/templates/integration-record.md) for the exact tested combination.
 
-Contract changes invalidate only affected evidence for the new target, preserving historical results; updates are delivered at the existing safe session boundaries. Recovery reconciles the ledger with original session metadata and evidence before any dispatch. Small single-repo changes still use only the ordinary mission/handoff. See the [coordination procedure](skills/codex-dev-team/references/team-coordination.md), [complete synthetic example](skills/codex-dev-team/references/team-example.md), and [document walkthrough results](docs/coordination-validation.md). These coordination resources are included in v0.2.0; the installation commands above select that release.
+Contract changes invalidate only affected evidence for the new target, preserving historical results; updates are delivered at the existing safe session boundaries. Recovery reconciles the ledger with original session metadata and evidence before any dispatch. Small single-repo changes still use only the ordinary mission/handoff. See the [coordination procedure](skills/codex-dev-team/references/team-coordination.md), [complete synthetic example](skills/codex-dev-team/references/team-example.md), and [document walkthrough results](docs/coordination-validation.md). These coordination resources were introduced in v0.2.0 and are included in v0.3.0, selected above.
 
 ## Scenarios and examples
 

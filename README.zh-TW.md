@@ -34,13 +34,13 @@ flowchart TD
 
 ```text
 用 $skill-installer 安裝這個 skill：
-https://github.com/sd0xdev/codex-dev-team/tree/v0.2.0/skills/codex-dev-team
+https://github.com/sd0xdev/codex-dev-team/tree/v0.3.0/skills/codex-dev-team
 ```
 
 或自行安裝指定版本：
 
 ```bash
-git clone --branch v0.2.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
+git clone --branch v0.3.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
 cd codex-dev-team
 python3 install.py
 ```
@@ -82,7 +82,7 @@ Codex 建立任務包、確認依賴、開啟獨立的 tmux／Remote Control 對
 
 ## 可選：依階段與額度自動選模
 
-**尚未發布：**本節描述下一版功能；上方固定的 v0.2.0 安裝尚未包含。Review 時請把 PR 分支安裝到隔離的 skills root。
+本功能已包含在 **v0.3.0**，上方安裝指令會取得此版本。
 
 複製[最小 JSON 配置](skills/codex-dev-team/assets/model-policy.example.json)，將佔位模型 ID 換成你帳號可用的完整 ID，放在 skill 與產品 repo 外，再設定一次：
 
@@ -102,7 +102,7 @@ export CODEX_DEV_TEAM_MODEL_POLICY='/absolute/private/path/model-policy.json'
 
 有共同資料、契約或服務相依的團隊，由 PM 維護一份放在產品 repo 外的 [team ledger](skills/codex-dev-team/assets/templates/team-ledger.md)；架構、契約與持久交接說明留在相應 repo，沿用既有文件。總表連結資料責任、實際寫入／查詢／事件路徑、各隊採用的契約與程式版本，並指定 owner，以 [integration record](skills/codex-dev-team/assets/templates/integration-record.md) 記錄真正測過的版本組合。
 
-契約變更時只標記受影響的證據需重驗，保留歷史結果，並在既有安全的對話派送時機通知相關 owner。對話壓縮或隔天恢復時，先核對總表、原始 session 記錄與證據再派工。單 repo 小修改仍只用原本的 mission／handoff。詳見[協調流程](skills/codex-dev-team/references/team-coordination.md)、[完整合成示例](skills/codex-dev-team/references/team-example.md)與[文件情境走查結果](docs/coordination-validation.md)。這些協調文件與模板已包含在 v0.2.0，上方安裝指令會取得此版本。
+契約變更時只標記受影響的證據需重驗，保留歷史結果，並在既有安全的對話派送時機通知相關 owner。對話壓縮或隔天恢復時，先核對總表、原始 session 記錄與證據再派工。單 repo 小修改仍只用原本的 mission／handoff。詳見[協調流程](skills/codex-dev-team/references/team-coordination.md)、[完整合成示例](skills/codex-dev-team/references/team-example.md)與[文件情境走查結果](docs/coordination-validation.md)。這些協調文件與模板自 v0.2.0 加入，也包含在上方安裝指令指定的 v0.3.0。
 
 ## 使用場景與案例
 

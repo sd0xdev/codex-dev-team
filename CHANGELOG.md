@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 — 2026-11-20
 
 - Add opt-in user-configured stage and quota model selection shared by launch/resume, with explicit overrides and legacy fallback.
 - Record selection provenance, handle stale usage and exhausted shared quota, and preserve session/readback, effort and permission safeguards.
