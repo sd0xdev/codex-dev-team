@@ -82,6 +82,24 @@ Review the final handoff and evidence. Do not push or deploy.
 
 Codex records a mission, verifies prerequisites, and starts an owned tmux/Remote Control session. It checks the actual session and model before dispatching. Claude implements and completes its harness loop. Codex then checks the final diff, gate evidence, and acceptance criteria. RC can remain available for you to inspect the conversation. If you explicitly choose non-RC execution, the helper supports recorded print-mode runs.
 
+## Optional automatic model selection
+
+**Unreleased:** this section describes the next version; the pinned v0.2.0 install above does not include it. For review, install the PR branch into an isolated skills root.
+
+Configure once with the [minimal JSON template](skills/codex-dev-team/assets/model-policy.example.json), replacing the placeholder IDs with models available to you. Keep it outside the skill and product repos, then set:
+
+```bash
+export CODEX_DEV_TEAM_MODEL_POLICY='/absolute/private/path/model-policy.json'
+```
+
+Tell Codex to use that policy. The PM classifies each mission and supplies `--stage research`, `design`, `acceptance`, `development`, or `test-writing` on launch/resume, without asking for a model every round. Executing existing tests and checking results is **acceptance**; adding/modifying tests alone is **test-writing**; code changes plus tests use **development**.
+
+The order is this run's explicit `--model` > an enabled matching quota rule > the stage model. With no applicable configuration, launch still requires `--model` and resume retains the previous choice. Model IDs, quota strategy, freshness, thresholds, and the pressure model are user-controlled. Missing/stale usage falls back to the stage; a fresh exhausted shared quota blocks a new run because changing models cannot restore it. Quota handling is disabled in the minimal example. No credentials or private usage API are needed.
+
+An optional personal example uses Fable 5.2 for research/design/acceptance and Opus 5.5 for development/test-writing, with Opus 5.5 under predicted quota pressure. These are illustrative display names, not bundled defaults or guaranteed CLI IDs. See the [configuration guide](skills/codex-dev-team/references/model-selection.md) for both quota strategies, snapshot format, and the seven-day example where 60% usage at day 2 versus day 6 leads to different decisions.
+
+The guide also demonstrates the same recorded session progressing through **research → development with tests → a separate acceptance phase**, with inherited effort, RC and permission settings and fresh actual-model readback. A same-session acceptance phase does not replace an independent harness reviewer. Changes happen only after the previous process exits; no background model switching or automatic cross-session injection is introduced.
+
 ## Coordination records
 
 For teams sharing data, contracts, or service dependencies, the PM keeps one external [team ledger](skills/codex-dev-team/assets/templates/team-ledger.md), while canonical architecture/contracts and durable product handover notes stay in their repos. Reuse existing records rather than duplicate them. Track data ownership and actual write/query/event paths, each team's adopted contract and revision, and a named owner's [integration record](skills/codex-dev-team/assets/templates/integration-record.md) for the exact tested combination.

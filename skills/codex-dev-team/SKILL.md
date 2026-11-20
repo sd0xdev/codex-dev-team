@@ -11,7 +11,7 @@ Codex owns scope, architecture, dependencies, and acceptance. Claude Code owns i
 
 ## Start with a bounded mission
 
-Read the project's instructions and current Git state. Preserve existing changes. Determine acceptance criteria, non-goals, allowed paths, interface contracts, and already-authorized external actions. Choose the user's model explicitly; there is no bundled model, effort, quota, or account policy. Check the installed CLI's supported permission modes before choosing one. Never bypass permission checks.
+Read the project's instructions and current Git state. Preserve existing changes. Determine acceptance criteria, non-goals, allowed paths, interface contracts, and already-authorized external actions. Honor the user's explicit model or optional local stage/quota policy; there is no bundled model, effort, quota, or account policy. For configured selection, read [model-selection.md](references/model-selection.md), classify each mission, and pass its stage without repeatedly asking the user. Running existing tests is acceptance; writing tests alone is test-writing; implementation plus tests is development. Check the installed CLI's supported permission modes before choosing one. Never bypass permission checks.
 
 For one project, use one Claude conversation unless distinct ownership justifies more. For work sharing data, contracts, or service dependencies across teams/repos, read [team-coordination.md](references/team-coordination.md). Keep one Codex PM conversation and a separately recorded Claude run per owner; use its canonical data-map, ledger, change-impact, integration and recovery guidance. A small single-repo edit does not require a multi-team ledger or integration document. Do not parallelize conflicting writers. Avoid grouping unrelated projects into one PM context.
 
@@ -25,7 +25,7 @@ Missing readiness permits a **setup-only** run, never product implementation. Af
 
 ## Dispatch and supervise
 
-Read [orchestration.md](references/orchestration.md) before launching, dispatching, monitoring, or resuming. Use the included helpers with explicit repo, model, permission mode, run directory, socket, and recorded session identity.
+Read [orchestration.md](references/orchestration.md) before launching, dispatching, monitoring, or resuming. Use the included helpers with explicit repo, permission mode, run directory, socket, and recorded session identity. Select the model via this run’s explicit override, a configured quota rule, or stage mapping, in that order. With no applicable policy, launch requires a model and resume inherits the prior choice. Model changes use a safe stopped-process resume boundary and fresh actual-model readback.
 
 Remote Control is the normal interactive workflow. Launch without sending the mission; inspect the current session's RC state, model, and empty idle prompt, then dispatch once. A stored URL is not proof of current connectivity. If the user chooses a non-RC run, record that choice with `--no-rc-reason`; do not silently fall back when RC fails.
 

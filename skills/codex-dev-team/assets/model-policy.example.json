@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "stage_models": {
+    "research": "your-research-model-id",
+    "design": "your-design-model-id",
+    "acceptance": "your-acceptance-model-id",
+    "development": "your-development-model-id",
+    "test-writing": "your-test-writing-model-id"
+  },
+  "quota": { "enabled": false }
+}

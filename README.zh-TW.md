@@ -80,6 +80,24 @@ claude plugin install sd0x-dev-flow@sd0xdev-marketplace --scope project
 
 Codex 建立任務包、確認依賴、開啟獨立的 tmux／Remote Control 對話，核對實際 session、模型與 idle 狀態後才送出任務。Claude 完成實作與 harness loop，再由 Codex 核對 diff、證據與 AC。使用者可透過 RC 查看對話；明確選擇不使用 RC 時，也支援保存執行紀錄的 print mode。
 
+## 可選：依階段與額度自動選模
+
+**尚未發布：**本節描述下一版功能；上方固定的 v0.2.0 安裝尚未包含。Review 時請把 PR 分支安裝到隔離的 skills root。
+
+複製[最小 JSON 配置](skills/codex-dev-team/assets/model-policy.example.json)，將佔位模型 ID 換成你帳號可用的完整 ID，放在 skill 與產品 repo 外，再設定一次：
+
+```bash
+export CODEX_DEV_TEAM_MODEL_POLICY='/absolute/private/path/model-policy.json'
+```
+
+告訴 Codex 使用這份配置，PM 會依當輪任務在 launch／resume 傳入 `--stage research`（研究）、`design`（設計／架構）、`acceptance`（驗收）、`development`（開發）或 `test-writing`（撰寫測試），不用每輪重問模型。**執行既有測試、核對結果屬於驗收；單獨新增或修改測試屬於撰寫測試；同輪修程式並補測試則使用開發階段。**
+
+優先順序為本輪明確 `--model` > 已啟用且命中的額度策略 > 階段模型。沒有適用配置時維持原行為：launch 要明確模型，resume 沿用上次選擇。模型 ID、額度策略、資料有效期限、門檻與額度緊張時的模型，都由使用者設定。用量缺失或過期就退回階段設定；有效快照顯示共用額度已耗盡時會停止新 run，不能靠換模型當作恢復額度。最小範例預設停用額度判斷，不需提供憑證或串接私人用量 API。
+
+個人配置可以示範為：研究／設計／驗收用 Fable 5.2，開發／撰寫測試用 Opus 5.5，預期額度會在重置前耗盡時改用 Opus 5.5。這些只是顯示名稱範例，並非內建預設或保證可用的 CLI ID。[完整配置指引](skills/codex-dev-team/references/model-selection.md) 說明兩種額度策略、快照格式，以及七天週期已用 60% 時，第 2 天與第 6 天會得到不同判斷的案例。
+
+指引也示範同一個記錄中的 session 依序進行**研究 → 開發並補測試 → 單獨一輪驗收**，保留 effort、RC、權限，並重新核對實際模型。同一 session 的驗收階段不取代 harness 的獨立 reviewer。只在前一個 process 結束後透過 resume 切換，不增加背景自動切模或跨 session 注入。
+
 ## 協調紀錄
 
 有共同資料、契約或服務相依的團隊，由 PM 維護一份放在產品 repo 外的 [team ledger](skills/codex-dev-team/assets/templates/team-ledger.md)；架構、契約與持久交接說明留在相應 repo，沿用既有文件。總表連結資料責任、實際寫入／查詢／事件路徑、各隊採用的契約與程式版本，並指定 owner，以 [integration record](skills/codex-dev-team/assets/templates/integration-record.md) 記錄真正測過的版本組合。
