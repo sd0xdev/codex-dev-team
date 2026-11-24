@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 # Run and resume a Claude conversation
 
-Requires macOS or Linux, Python 3.9+, Git, tmux, and an authenticated Claude Code CLI. Check `claude --help` for the requested model, permission mode, RC, and effort support. Models are account-dependent; use full model IDs selected by the user or their optional local policy. Effort is optional and otherwise follows CLI behavior. The full sd0x-harness setup is required for product development; setup-only runs may precede it.
+Requires macOS or Linux, Python 3.9+, Git, tmux, and an authenticated Claude Code CLI. Check `claude --help` for the requested model, permission mode, RC, and effort support. Models are account-dependent; use full model IDs selected by the user or their optional local policy. The helper reads supported permission-mode choices from the installed CLI’s help on every launch/resume and records them. Unsupported choices or unrecognized help fail before creating a run; do not substitute another mode automatically. Effort is optional and otherwise follows CLI behavior. The full sd0x-harness setup is required for product development; setup-only runs may precede it.
 
 Use absolute paths. Examples below contain placeholders; resolve them before execution. `H` points into this installed skill, not a product repo.
 
@@ -21,7 +21,7 @@ Each launch/resume creates a new private directory containing a mission, script,
 
 ## Interactive readback before dispatch
 
-Launch creates an interactive RC conversation without submitting the mission. Inspect only its recorded pane using `env -u TMUX -u TMUX_TMPDIR tmux -S '<socket>' capture-pane -p -t '<pane-id>'`. Resolve startup trust/permission prompts within existing authorization. In that conversation, read the current RC panel and model settings. Verify the session identity, active RC connection, actual full model ID, and an empty idle prompt. Close menus before dispatch. Do not clear a user draft or submit a prompt suggestion.
+Launch creates an interactive RC conversation without submitting the mission. Inspect only its recorded pane using `env -u TMUX -u TMUX_TMPDIR tmux -S '<socket>' capture-pane -p -t '<pane-id>'`. Resolve startup trust/permission prompts within existing authorization. In that conversation, read the current RC panel and model settings. Verify the session identity, active RC connection, actual full model ID, and an empty idle prompt. Share the verified current URL with the user before dispatch; distinguish local RC connection from separately verified remote-page access. Close menus before dispatch. Do not clear a user draft or submit a prompt suggestion.
 
 ```bash
 python3 "$H" dispatch '<run-dir>' \
@@ -60,3 +60,7 @@ Without an applicable model rule or explicit override, the helper inherits the r
 When the user chooses non-RC execution, add `--no-rc-reason '<recorded user choice>'` to each launch/resume. This sends the mission in print mode and records stream JSON plus an exit marker. It is not a fallback for failed RC. `exited_ok` means the process completed normally, not that acceptance passed. Interactive processes can remain alive for RC after finishing their work.
 
 Never put secrets in missions, argv, or `--setenv`; its values are saved in `run.sh`. `--path-prepend` affects only this run. The helper refuses `bypassPermissions` and reserved environment overrides. Retain project-native authorization gates. Stop only the owned session when justified; closing a local process does not archive the remote conversation.
+
+## Completion and requested archive
+
+Keep a completed, idle interactive session available for inspection by default. A setup restart or model change may require a normal owned-process exit; completion alone is not an archive request. Use [remote-archive.md](remote-archive.md) only for requested remote archive and verify its separate remote outcome. No runner archive subcommand is provided.

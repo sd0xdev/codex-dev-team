@@ -6,7 +6,7 @@ English | [繁體中文](README.zh-TW.md)
 
 Read the introduction: [Codex Dev Team: One Codex, Multiple Claude Sessions, One Shared Goal](https://blog.sd0x.dev/blog/codex-dev-team-en/) — the workflow, intended audience, and practical examples.
 
-Codex handles scope, architecture, dependencies, and integration acceptance. Claude Code handles implementation, tests, and review/verification through the **required [sd0x-harness](https://github.com/sd0xdev/sd0x-harness) Claude Code plugin**.
+Codex handles product goals, business rules, scope, dependencies, and user-scenario acceptance. Claude Code chooses the architecture and handles implementation, tests, and review/verification through the **required [sd0x-harness](https://github.com/sd0xdev/sd0x-harness) Claude Code plugin**.
 
 Start with one Claude conversation for a focused task. Add more when the work spans **related features or components that need joint integration**—for example, a web app, API service, and shared SDK across three repositories. Keep unrelated work in separate Codex conversations.
 
@@ -19,7 +19,7 @@ flowchart TD
     A --> HA[sd0x-harness: review + verify]
     B --> HB[sd0x-harness: review + verify]
     C --> HC[sd0x-harness: review + verify]
-    HA --> I[Codex: contract checks + integration acceptance]
+    HA --> I[Codex: user scenarios + integration acceptance]
     HB --> I
     HC --> I
 ```
@@ -34,13 +34,13 @@ In Codex, you can ask the built-in installer:
 
 ```text
 Use $skill-installer to install the skill at
-https://github.com/sd0xdev/codex-dev-team/tree/v0.3.0/skills/codex-dev-team
+https://github.com/sd0xdev/codex-dev-team/tree/v0.4.0/skills/codex-dev-team
 ```
 
 Or install a versioned checkout yourself:
 
 ```bash
-git clone --branch v0.3.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
+git clone --branch v0.4.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
 cd codex-dev-team
 python3 install.py
 ```
@@ -80,11 +80,11 @@ implementation to Claude Code. Use my selected model and permission mode.
 Review the final handoff and evidence. Do not push or deploy.
 ```
 
-Codex records a mission, verifies prerequisites, and starts an owned tmux/Remote Control session. It checks the actual session and model before dispatching. Claude implements and completes its harness loop. Codex then checks the final diff, gate evidence, and acceptance criteria. RC can remain available for you to inspect the conversation. If you explicitly choose non-RC execution, the helper supports recorded print-mode runs.
+Codex records a mission, verifies prerequisites, and starts an owned tmux/Remote Control session. It checks the actual session and model before dispatching. Claude implements and completes its harness loop. Codex then accepts the agreed product scenarios and references the original gate evidence, without adding a competing technical review loop. RC can remain available for you to inspect the conversation. If you explicitly choose non-RC execution, the helper supports recorded print-mode runs.
 
 ## Optional automatic model selection
 
-Available in **v0.3.0**, selected by the installation commands above.
+Introduced in v0.3.0 and included in **v0.4.0**, selected above.
 
 Configure once with the [minimal JSON template](skills/codex-dev-team/assets/model-policy.example.json), replacing the placeholder IDs with models available to you. Keep it outside the skill and product repos, then set:
 
@@ -100,11 +100,21 @@ An optional personal example uses Fable 5.2 for research/design/acceptance and O
 
 The guide also demonstrates the same recorded session progressing through **research → development with tests → a separate acceptance phase**, with inherited effort, RC and permission settings and fresh actual-model readback. A same-session acceptance phase does not replace an independent harness reviewer. Changes happen only after the previous process exits; no background model switching or automatic cross-session injection is introduced.
 
+## Product PM, team ownership and design
+
+Codex defines what users should observe and the boundaries that must hold. Claude owns technical decisions and its project harness loop. When a product scenario fails, the PM returns expected versus observed behavior to the original Claude conversation; it does not take over implementation or prescribe extra review rounds. Required repository gates remain applicable. See [product acceptance](skills/codex-dev-team/references/product-acceptance.md).
+
+Each accountable team keeps its own resumable main Claude conversation. For short work the lead PM coordinates directly; for independently progressing teams, host-supported Codex sub-PMs can handle day-to-day follow-up while the main conversation stays available for priorities. Exactly one PM dispatches to a given Claude conversation at a time. Ownership transfers include queued work and existing authorization in the shared ledger.
+
+For visual work, Claude is the default designer. Codex leads the visual brief only if you choose that role. A design-only request does not authorize development or deployment. Optional asset sets use immutable revisions, engineering receipts and runtime acceptance, with no private asset-plugin dependency. Read [design and asset handoff](skills/codex-dev-team/references/visual-design.md) and the [Claude skill selection guide](skills/codex-dev-team/references/claude-skill-guide.md).
+
+Completed idle RC conversations stay available by default. Archive happens only when requested, and requires a verified remote outcome; local exit alone is insufficient. See [archive guidance](skills/codex-dev-team/references/remote-archive.md).
+
 ## Coordination records
 
 For teams sharing data, contracts, or service dependencies, the PM keeps one external [team ledger](skills/codex-dev-team/assets/templates/team-ledger.md), while canonical architecture/contracts and durable product handover notes stay in their repos. Reuse existing records rather than duplicate them. Track data ownership and actual write/query/event paths, each team's adopted contract and revision, and a named owner's [integration record](skills/codex-dev-team/assets/templates/integration-record.md) for the exact tested combination.
 
-Contract changes invalidate only affected evidence for the new target, preserving historical results; updates are delivered at the existing safe session boundaries. Recovery reconciles the ledger with original session metadata and evidence before any dispatch. Small single-repo changes still use only the ordinary mission/handoff. See the [coordination procedure](skills/codex-dev-team/references/team-coordination.md), [complete synthetic example](skills/codex-dev-team/references/team-example.md), and [document walkthrough results](docs/coordination-validation.md). These coordination resources were introduced in v0.2.0 and are included in v0.3.0, selected above.
+Contract changes invalidate only affected evidence for the new target, preserving historical results; updates are delivered at the existing safe session boundaries. Recovery reconciles the ledger with original session metadata and evidence before any dispatch. Small single-repo changes still use only the ordinary mission/handoff. See the [coordination procedure](skills/codex-dev-team/references/team-coordination.md), [complete synthetic example](skills/codex-dev-team/references/team-example.md), and [document walkthrough results](docs/coordination-validation.md). These coordination resources were introduced in v0.2.0 and are included in v0.4.0, selected above.
 
 ## Scenarios and examples
 
@@ -152,7 +162,7 @@ Codex fixes the compatibility contract and rollout order. Separate Claude conver
 
 **Task:** update checkout UI and its payment adapter together.
 
-Use separate Claude conversations only with disjoint file ownership, or isolated worktrees and one integration owner. Shared generated types, lockfiles, and Git operations must have a single owner. If that separation costs more than it saves, use one Claude conversation and execute sequentially.
+Use separate Claude conversations only with disjoint file ownership, or user/project-selected isolated worktrees and one integration owner. Shared generated types, lockfiles, and Git operations must have a single owner. If that separation costs more than it saves, use one Claude conversation and execute sequentially.
 
 ## What the skill keeps track of
 
@@ -161,7 +171,7 @@ Use separate Claude conversations only with disjoint file ownership, or isolated
 - Shared contract revisions, dependencies, blockers, and component handoffs.
 - Separate outcomes for local tests, review, verification, CI, deployment, runtime readback, and integration acceptance.
 
-The runner refuses permission bypass, does not reuse run directories, and prevents blind initial mission replay. The watcher is read-only, deduplicates stop events, and preserves unsent prompt text. A stopped event, exit code, or “done” message is never acceptance by itself.
+The runner verifies the chosen permission mode against the installed CLI on launch/resume, records the supported choices, and stops on unsupported or unrecognized help without silently choosing another mode. It refuses permission bypass, does not reuse run directories, and prevents blind initial mission replay. The watcher is read-only, deduplicates stop events, and preserves unsent prompt text. A stopped event, exit code, or “done” message is never acceptance by itself.
 
 ## Updates and removal
 

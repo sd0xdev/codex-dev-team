@@ -5,18 +5,29 @@ Use this workflow when teams share data, contracts, or service dependencies towa
 
 The runner manages individual runs. Codex coordinates the teams, without an autonomous scheduler, timed LLM heartbeat, or automatic cross-session injection.
 
+## Main conversations and PM delegation
+
+Each independently accountable team has a recorded main Claude conversation that can be opened and resumed separately. Recover that existing identity before creating a new one. Team-internal forks/subagents may assist research and review; cross-team delivery and revisions go through the team's main conversation.
+
+At kickoff, explain the coordination arrangement in one sentence. A single API change, or a second team only checking one field, usually needs direct PM coordination. When API, SDK and Web each have independent work and repeated follow-up, a Codex sub-PM per team can keep the main user conversation available for priorities and cross-team decisions. Use delegation only when supported and permitted by the host; direct coordination is a complete fallback.
+
+- The lead PM owns shared goals, product decisions, dependencies, authorization boundaries and overall acceptance.
+- Each sub-PM uses its team's recorded Claude conversation for dispatch, waiting, evidence handoff and bounded product revisions. Claude retains technical implementation/review ownership. Exactly one PM dispatches to a given Claude session at a time.
+- Sub-PMs report completed milestones, blockers requiring coordination and decisions affecting other teams, with evidence and next actions. Routine follow-up stays with the responsible sub-PM; no autonomous cross-session message service is introduced.
+- Reassigning a PM requires an explicit handover of current run/session, last delivered mission, queued unsent revisions, authorization and next action. Change the ledger's dispatch owner before another PM sends work. User updates stay with the existing team owner unless ownership is deliberately transferred.
+
 ## Shared records and ownership
 
 - Keep the PM [team ledger](../assets/templates/team-ledger.md) and [integration records](../assets/templates/integration-record.md), run metadata, missions, and handoffs in an access-controlled task workspace **outside all product repos**. The helper's dedicated `--runs-root` contains only helper-created runs and its socket; keep the ledger and input missions in a sibling directory. Leave project-native harness review/verify reports in their original workflow-managed locations and link to them; do not relocate original evidence or reconfigure a runner just to fit the ledger. Preserve those reports under the project’s existing retention and access rules, without publishing credentials.
 - Keep architecture, contracts, and durable product handover notes in their appropriate repos. Find existing documents first; update them, creating missing records only when needed. Select one canonical shared map/table location and maintenance owner. Other teams link to its pinned revision; they do not copy the whole map. Record each team's adopted contract separately from the PM's target contract.
 - The ledger indexes original evidence and current pointers; it is not a transcript or a second handoff. It may link to a repo handover note describing design decisions, remaining product work, and validation boundaries. Do not commit runtime routing or machine paths into product notes. Do not store tokens, signed credential values, or credentials in any of these records; describe field names and semantics only.
-- One owner per overlapping writable file set, including the shared docs. Serialize overlapping writes or use isolated worktrees with a named integration owner. Concurrent Git writers must not share a checkout. More sessions do not grant more permissions.
+- One owner per overlapping writable file set, including the shared docs. Serialize overlapping writes; use isolated worktrees only when the user or project instructions select that arrangement, with a named integration owner. Concurrent Git writers must not share a checkout. More sessions do not grant more permissions.
 
 Use [mission.md](../assets/templates/mission.md) and [handoff.md](../assets/templates/handoff.md) for individual teams. Their cross-team sections link to the ledger and canonical docs instead of duplicating them. See the [worked example](team-example.md) for a filled synthetic plan, state transition, and recovery exercise.
 
 ## Establish the data map before dispatch
 
-Read the actual routes, authorization checks, queries, producers/consumers, and schemas at identifiable revisions. Compare them with existing architecture docs. Label statements as code-inspected current behavior, proposed change, historical behavior, or runtime-observed behavior with original evidence. Unknown paths remain unknown; do not fill gaps by guessing from service names.
+Assign the responsible Claude owners to inspect the actual routes, authorization checks, queries, producers/consumers, and schemas at identifiable revisions. The PM records ownership, product questions and evidence pointers; it does not run a parallel technical document/code review. Compare them with existing architecture docs. Label statements as code-inspected current behavior, proposed change, historical behavior, or runtime-observed behavior with original evidence. Unknown paths remain unknown; do not fill gaps by guessing from service names.
 
 In the shared architecture document, maintain a responsibility table covering:
 
@@ -45,11 +56,11 @@ For example, validating the current device does not establish a device-only reco
 
 ## Dispatch and keep the ledger current
 
-Agree the shared goal, integration AC, integration owner, canonical document locations/owners and contract target. Each team records its repo/worktree, baseline and allowed paths, dependencies, adopted contract, current run and actual Claude session/socket/pane, effective harness readiness evidence, selected model/effort and existing authorization. Keep deployment revisions separate from source revisions when deployment is in scope.
+Agree the shared goal, integration AC, integration owner, canonical document locations/owners and contract target. Record the lead PM, any sub-PM and the sole dispatch owner for each main Claude conversation. Each team records its repo/worktree, baseline and allowed paths, dependencies, adopted contract, current run and actual Claude session/socket/pane, effective harness readiness evidence, selected model/effort and existing authorization. Keep deployment revisions separate from source revisions when deployment is in scope.
 
 Before dispatch, apply [harness readiness](harness.md) per repo and the existing [orchestration](orchestration.md) readback rules. Record last-checked time with timezone and next action. Update the ledger at meaningful events: dispatch/resume, changed contract, new handoff or revision, blocker, verification, and before context handover. These are task events, not a new polling schedule.
 
-Allow parallel development only where ownership and inputs permit it. A labeled fixture can unblock development, but cannot close real integration AC. Owners update their repo's relevant docs and durable handover notes as part of the work. Documentation changes go through that project's existing review loop; review the maps, tables, code, contracts and final revisions together. A code inspection is not a runtime check.
+Allow parallel development only where ownership and inputs permit it. A labeled fixture can unblock development, but cannot close real integration AC. Owners update their repo's relevant docs and durable handover notes as part of the work. Documentation changes go through that project's existing review loop; the responsible Claude owner and project reviewers check the maps, tables, code, contracts and final revisions together. A code inspection is not a runtime check.
 
 ## Capture one tested component combination
 
@@ -80,7 +91,7 @@ When an upstream contract or shared data assumption changes:
 
 ## PM final integration acceptance
 
-Close the shared AC only when:
+The PM checks the agreed user-facing integration scenarios and references the responsible owners’ technical evidence, without adding a second technical review. Close the shared AC only when:
 
 - The current data map/table agree with the final code and adopted contracts; document review is complete under each project's workflow, with unresolved uncertainties stated.
 - Relevant owners have stopped editing and provided final-revision handoffs and original harness review/verify evidence. Background work is accounted for.

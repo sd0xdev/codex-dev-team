@@ -49,6 +49,21 @@ def now():
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def permission_choices(help_text):
+    """Read only the permission-mode option's choices, including wrapped help."""
+    option = re.search(r"(?m)^\s*--permission-mode(?:\s|$)", help_text)
+    if not option:
+        return set()
+    block = help_text[option.end():]
+    following = re.search(r"(?m)^\s*(?:-\w,\s*)?--[\w-]+", block)
+    if following:
+        block = block[:following.start()]
+    choices = re.search(r"\bchoices:\s*([^)]*)\)", block, re.DOTALL)
+    if not choices:
+        return set()
+    return set(re.findall(r"[\"']([A-Za-z][A-Za-z0-9]*)[\"']", choices.group(1)))
+
+
 def models_match(requested, actual):
     """Compare model IDs, allowing only the optional trailing [1m] qualifier.
 
@@ -330,12 +345,16 @@ def prepare_and_start(a, kind, repo, model, resume_session=None, parent_run=None
     if not re.fullmatch(r"[A-Za-z0-9_-]+", a.task_name):
         die("TASK_NAME_INVALID", "use a short ticket/name containing letters, digits, underscore or hyphen")
     interactive = not a.no_rc_reason
-    if interactive or getattr(a, "effort", None):
-        help_text = run([claude_bin, "--help"]).stdout.decode(errors="replace")
-        if getattr(a, "effort", None) and "--effort" not in help_text:
-            die("EFFORT_UNSUPPORTED", "CLI must support --effort; requested effort must not be silently dropped")
-        if interactive and ("--remote-control" not in help_text or "--session-id" not in help_text):
-            die("RC_UNSUPPORTED", "CLI must support --remote-control and --session-id; no print fallback")
+    help_text = run([claude_bin, "--help"]).stdout.decode(errors="replace")
+    supported_modes = permission_choices(help_text)
+    if not supported_modes:
+        die("PERMISSION_MODE_UNVERIFIED", "Cannot read permission-mode choices from this CLI's --help; inspect its help format before retrying")
+    if a.permission_mode not in supported_modes:
+        die("PERMISSION_MODE_UNSUPPORTED", f"Requested {a.permission_mode!r} is not supported by this CLI; retain the user's choice and report the incompatibility")
+    if getattr(a, "effort", None) and "--effort" not in help_text:
+        die("EFFORT_UNSUPPORTED", "CLI must support --effort; requested effort must not be silently dropped")
+    if interactive and ("--remote-control" not in help_text or "--session-id" not in help_text):
+        die("RC_UNSUPPORTED", "CLI must support --remote-control and --session-id; no print fallback")
     fp = fingerprint(repo)
     repo = Path(fp["repo"])
     runs_root = check_runs_root(Path(a.runs_root), repo)
@@ -387,6 +406,7 @@ def prepare_and_start(a, kind, repo, model, resume_session=None, parent_run=None
         "fingerprint": fp, "tmux_socket": str(socket), "tmux_session": tmux_name, "requested_model": model, "requested_effort": effort,
         "model_selection": getattr(a, "model_selection", None),
         "permission_mode": a.permission_mode, "claude_bin": claude_bin, "claude_version": version,
+        "permission_mode_choices": sorted(supported_modes),
         "path_prepend": a.path_prepend, "add_dirs": [str(Path(d).resolve()) for d in a.add_dir],
         "setenv_names": [k for k, _ in a.setenv], "resume_session_id": resume_session,
         "parent_run": parent_run, "argv": args_list, "started": False,

@@ -6,7 +6,7 @@
 
 完整介紹：[Codex Dev Team：讓一個 Codex，帶一組 Claude 完成同一件事](https://blog.sd0x.dev/blog/codex-dev-team/) — 了解工作方式、適用對象與實際使用場景。
 
-Codex 負責需求、架構、任務拆分、依賴協調與整合驗收；Claude Code 負責實作、測試，以及透過必要的 **[sd0x-harness Claude Code plugin](https://github.com/sd0xdev/sd0x-harness)** 完成獨立 review 與 verify。
+Codex 負責產品目標、業務規則、範圍、依賴協調與使用情境驗收；Claude Code 自主選擇架構並負責實作、測試，以及透過必要的 **[sd0x-harness Claude Code plugin](https://github.com/sd0xdev/sd0x-harness)** 完成獨立 review 與 verify。
 
 簡單任務先用一個 Claude 對話。當工作涉及**相關功能、需要聯調的元件，或多個專案的串接**時，再由同一個 Codex PM 管理多個 Claude 對話。不相關的工作建議分開 Codex 對話，避免需求與決策混在一起。
 
@@ -34,13 +34,13 @@ flowchart TD
 
 ```text
 用 $skill-installer 安裝這個 skill：
-https://github.com/sd0xdev/codex-dev-team/tree/v0.3.0/skills/codex-dev-team
+https://github.com/sd0xdev/codex-dev-team/tree/v0.4.0/skills/codex-dev-team
 ```
 
 或自行安裝指定版本：
 
 ```bash
-git clone --branch v0.3.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
+git clone --branch v0.4.0 --depth 1 https://github.com/sd0xdev/codex-dev-team.git
 cd codex-dev-team
 python3 install.py
 ```
@@ -78,11 +78,11 @@ claude plugin install sd0x-dev-flow@sd0xdev-marketplace --scope project
 這次不 push、不部署。
 ```
 
-Codex 建立任務包、確認依賴、開啟獨立的 tmux／Remote Control 對話，核對實際 session、模型與 idle 狀態後才送出任務。Claude 完成實作與 harness loop，再由 Codex 核對 diff、證據與 AC。使用者可透過 RC 查看對話；明確選擇不使用 RC 時，也支援保存執行紀錄的 print mode。
+Codex 建立任務包、確認依賴、開啟獨立的 tmux／Remote Control 對話，核對實際 session、模型與 idle 狀態後才送出任務。Claude 完成實作與 harness loop，再由 Codex 核對使用情境與原始 gate 證據，不另開競爭的技術審查 loop。使用者可透過 RC 查看對話；明確選擇不使用 RC 時，也支援保存執行紀錄的 print mode。
 
 ## 可選：依階段與額度自動選模
 
-本功能已包含在 **v0.3.0**，上方安裝指令會取得此版本。
+本功能自 v0.3.0 加入，並包含在上方安裝指令指定的 **v0.4.0**。
 
 複製[最小 JSON 配置](skills/codex-dev-team/assets/model-policy.example.json)，將佔位模型 ID 換成你帳號可用的完整 ID，放在 skill 與產品 repo 外，再設定一次：
 
@@ -98,11 +98,21 @@ export CODEX_DEV_TEAM_MODEL_POLICY='/absolute/private/path/model-policy.json'
 
 指引也示範同一個記錄中的 session 依序進行**研究 → 開發並補測試 → 單獨一輪驗收**，保留 effort、RC、權限，並重新核對實際模型。同一 session 的驗收階段不取代 harness 的獨立 reviewer。只在前一個 process 結束後透過 resume 切換，不增加背景自動切模或跨 session 注入。
 
+## 產品 PM、團隊歸屬與設計分工
+
+Codex 定義使用者應看到的結果與不可跨越的界線，Claude 自主決定技術做法並完成專案 harness loop。情境驗收有落差時，PM 將預期與實際結果交回原 Claude 對話，不接手實作或指定額外審查輪數；repo 既有必要 gate 仍須遵守。詳見[產品驗收指引](skills/codex-dev-team/references/product-acceptance.md)。
+
+每個有獨立交付責任的團隊，保留一個可單獨開啟與接續的 Claude 主對話。短任務由總 PM 直接協調；多隊可各自推進時，可在宿主支援下讓 Codex 子 PM 跟進各隊，主對話繼續討論需求與優先順序。同一 Claude 對話同時只有一位 PM 派工，換手時在總表交代待送任務與既有授權。
+
+視覺工作預設由 Claude 擔任 designer，只有你選擇時才由 Codex 主導視覺 brief。設計任務不自動授權完整開發或部署。需要成套素材時，以不可變版本、工程接收紀錄與 runtime 驗收交接，不依賴私人素材 plugin。詳見[設計與素材協作](skills/codex-dev-team/references/visual-design.md)及 [Claude skill 選用指引](skills/codex-dev-team/references/claude-skill-guide.md)。
+
+已完成且 idle 的 RC 對話預設保留；只有要求封存時才執行，並核對遠端結果，本機退出不代表已封存。詳見[封存指引](skills/codex-dev-team/references/remote-archive.md)。
+
 ## 協調紀錄
 
 有共同資料、契約或服務相依的團隊，由 PM 維護一份放在產品 repo 外的 [team ledger](skills/codex-dev-team/assets/templates/team-ledger.md)；架構、契約與持久交接說明留在相應 repo，沿用既有文件。總表連結資料責任、實際寫入／查詢／事件路徑、各隊採用的契約與程式版本，並指定 owner，以 [integration record](skills/codex-dev-team/assets/templates/integration-record.md) 記錄真正測過的版本組合。
 
-契約變更時只標記受影響的證據需重驗，保留歷史結果，並在既有安全的對話派送時機通知相關 owner。對話壓縮或隔天恢復時，先核對總表、原始 session 記錄與證據再派工。單 repo 小修改仍只用原本的 mission／handoff。詳見[協調流程](skills/codex-dev-team/references/team-coordination.md)、[完整合成示例](skills/codex-dev-team/references/team-example.md)與[文件情境走查結果](docs/coordination-validation.md)。這些協調文件與模板自 v0.2.0 加入，也包含在上方安裝指令指定的 v0.3.0。
+契約變更時只標記受影響的證據需重驗，保留歷史結果，並在既有安全的對話派送時機通知相關 owner。對話壓縮或隔天恢復時，先核對總表、原始 session 記錄與證據再派工。單 repo 小修改仍只用原本的 mission／handoff。詳見[協調流程](skills/codex-dev-team/references/team-coordination.md)、[完整合成示例](skills/codex-dev-team/references/team-example.md)與[文件情境走查結果](docs/coordination-validation.md)。這些協調文件與模板自 v0.2.0 加入，也包含在上方安裝指令指定的 v0.4.0。
 
 ## 使用場景與案例
 
@@ -150,7 +160,7 @@ Codex 先固定相容性契約與 rollout 順序，再分別讓三個 Claude 對
 
 **需求：同時更新結帳 UI 與付款 adapter。**
 
-只有檔案責任明確分離，或採用隔離 worktree 並指定整合 owner 時，才讓多個 Claude 同時改動。共用型別、lockfile、Git 操作都要有單一 owner。若拆分成本高於收益，就用一個 Claude 對話循序完成。
+只有檔案責任明確分離，或依使用者／專案指示採用隔離 worktree 並指定整合 owner 時，才讓多個 Claude 同時改動。共用型別、lockfile、Git 操作都要有單一 owner。若拆分成本高於收益，就用一個 Claude 對話循序完成。
 
 ## 協作時保留的資訊
 
@@ -160,6 +170,8 @@ Codex 先固定相容性契約與 rollout 順序，再分別讓三個 Claude 對
 - 分開記錄 local tests、review、verify、CI、部署、runtime readback 與整合驗收。
 
 Runner 拒絕 bypass permissions、不重用 run 目錄，並防止初始任務在送出失敗後被盲目重送。Watcher 只讀取狀態、去重停止事件，不代按允許，也不清空未送出的草稿。停止事件、exit 0 或一句「完成」，都不會自動等於驗收通過。
+
+啟動與 resume 前，runner 會核對已安裝 CLI 實際支援的 permission mode 並記錄選項。選擇不支援或 help 無法辨識時停止，不會自動換模式；既有模型、effort 與 RC 選擇仍保留。
 
 ## 更新與移除
 

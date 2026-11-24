@@ -5,6 +5,7 @@ import datetime as dt
 import io
 import json
 import os
+import shlex
 from pathlib import Path
 import subprocess
 import tempfile
@@ -170,7 +171,11 @@ class RunnerSelectionTests(unittest.TestCase):
         self.root = Path(self.tmp.name).resolve();self.repo = self.root/'repo';self.repo.mkdir()
         subprocess.run(['git','init','-q',str(self.repo)],check=True)
         self.mission = self.root/'mission.md';self.mission.write_text('Synthetic offline mission')
-        self.cli = self.root/'fake-claude';self.cli.write_text('#!/bin/sh\ncase "$1" in\n--help) echo "--remote-control --session-id --effort";;\n--version) echo fake-offline;;\n*) exit 91;;\nesac\n');self.cli.chmod(0o700)
+        self.cli = self.root/'fake-claude'
+        help_text = '--remote-control --session-id --effort\n  --permission-mode <mode> (choices: "manual")'
+        self.cli.write_text('#!/bin/sh\ncase "$1" in\n--help) printf "%s\\n" ' + shlex.quote(help_text) +
+                            ';;\n--version) echo fake-offline;;\n*) exit 91;;\nesac\n')
+        self.cli.chmod(0o700)
         self.policy = self.root/'policy.json'
         self.policy.write_text(json.dumps({'version':1,'stage_models':{'research':'custom-thinker-r1','development':'custom-coder-d2','test-writing':'custom-test-t3','acceptance':'custom-review-a4'}}))
         env = patch.dict(os.environ,{POLICY_ENV:''});env.start();self.addCleanup(env.stop)
