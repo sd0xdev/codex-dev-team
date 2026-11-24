@@ -5,7 +5,7 @@ Use only for shared data/contracts/service dependencies; reuse equivalent record
 
 ## Shared outcome and canonical references
 
-- PM / ledger maintenance owner:
+- Lead PM / ledger maintenance owner / direct or delegated coordination and reason:
 - Goal / non-goals / integration AC IDs:
 - Integration verification owner:
 - Target contract revision and canonical location / maintenance owner:
@@ -22,6 +22,8 @@ Use only for shared data/contracts/service dependencies; reuse equivalent record
 
 For each current run (snapshot for recovery; verify against original metadata before dispatch):
 
+- Team / assigned sub-PM if any / sole dispatching PM:
+- Main Claude conversation identity / last delivered mission / queued unsent revision / PM handover state:
 - Team / run directory / predecessor run if resumed:
 - Claude session ID / owned tmux socket / pane:
 - Observed process and RC state, or user's recorded non-RC choice / observed at:

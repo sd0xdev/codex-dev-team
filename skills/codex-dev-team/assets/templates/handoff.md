@@ -1,12 +1,12 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 # Handoff: <component/task>
 
-- Run/session and repo/worktree:
+- Team main Claude conversation / dispatching PM / run/session and repo/worktree:
 - Final HEAD and any uncommitted changes:
 - Editing stopped; remaining background work:
 - Shared contract revision:
 
-| Acceptance criterion | Evidence | Result or gap |
+| User scenario / expected behavior | Environment + delivered revision / evidence | Observed result or gap |
 |---|---|---|
 | | | |
 
@@ -34,3 +34,10 @@
 - Next owner/action and pending safe notification; distinguish delivered from acknowledged adoption:
 
 Link to the original integration record for tested combinations rather than copying its matrix. Per-team checks do not close shared AC. A changed source, contract or environment does not inherit an old integration pass automatically.
+
+## Design/assets only (omit when irrelevant)
+
+- Design role, user brief/decision and delivered stage:
+- Asset manifest revision/hash; consumed IDs/hashes/destination or transformation:
+- READY / INTEGRATED / product ACCEPTED states separately, with original evidence:
+- Runtime screenshot/video and actual consumed version; remaining gaps:

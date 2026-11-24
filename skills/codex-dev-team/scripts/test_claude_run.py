@@ -5,6 +5,7 @@ import contextlib
 import io
 import json
 import os
+import shlex
 from pathlib import Path
 import subprocess
 import tempfile
@@ -27,12 +28,17 @@ class RemoteControlTests(unittest.TestCase):
         self.mission = self.root / 'input.md'
         self.mission.write_text('Read this mission.\nDo not commit.\n')
         self.cli = self.root / 'fake-claude'
-        self.cli.write_text('#!/bin/sh\ncase "$1" in\n--help) echo "--remote-control --session-id --effort";;\n--version) echo "fake-offline";;\n*) exit 91;;\nesac\n')
-        self.cli.chmod(0o700)
+        self.set_cli_help('--remote-control --session-id --effort\n'
+                          '  --permission-mode <mode> (choices: "auto", "manual", "default", "bypassPermissions")')
         self.args = argparse.Namespace(mission=str(self.mission), permission_mode='auto',
             claude_bin=str(self.cli), setenv=[], runs_root=str(self.root / 'runs'),
             tmux_session=None, tmux_socket=str(self.root / 't.sock'), prepare_only=True,
             path_prepend=[], add_dir=[], task_name='TEST-1', no_rc_reason=None)
+
+    def set_cli_help(self, text):
+        self.cli.write_text('#!/bin/sh\ncase "$1" in\n--help) printf "%s\\n" ' + shlex.quote(text) +
+                            ';;\n--version) echo fake-offline;;\n*) exit 91;;\nesac\n')
+        self.cli.chmod(0o700)
 
     def prepare(self, **changes):
         for k, v in changes.items():
@@ -135,10 +141,60 @@ class RemoteControlTests(unittest.TestCase):
         self.assertFalse((second / 'dispatch.json').exists())
 
     def test_unsupported_effort_stops_before_creating_run(self):
-        self.cli.write_text('#!/bin/sh\necho "--remote-control --session-id"\n')
-        with self.assertRaises(SystemExit):
+        self.set_cli_help('--remote-control --session-id\n  --permission-mode <mode> (choices: "auto")')
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr), self.assertRaises(SystemExit):
             self.prepare(effort='medium')
+        self.assertIn('EFFORT_UNSUPPORTED', stderr.getvalue())
         self.assertFalse((self.root / 'runs').exists())
+
+    def test_supported_default_and_wrapped_permission_choices(self):
+        self.set_cli_help('--remote-control --session-id\n'
+                          '  --permission-mode <mode> Mode\n'
+                          '      (choices: "auto",\n'
+                          '                "default", "manual")\n'
+                          '  --output-format <format> (choices: "json")')
+        directory = self.prepare(permission_mode='default')
+        meta = json.loads((directory / 'meta.json').read_text())
+        self.assertEqual(meta['permission_mode'], 'default')
+        self.assertEqual(meta['permission_mode_choices'], ['auto', 'default', 'manual'])
+        self.assertEqual(meta['argv'][meta['argv'].index('--permission-mode') + 1], 'default')
+
+    def test_unsupported_mode_does_not_launch_or_fall_back_in_either_mode(self):
+        self.set_cli_help('--remote-control --session-id\n'
+                          '  --permission-mode <mode> (choices: "manual")\n'
+                          '  --other-option <mode> (choices: "auto")')
+        for reason in [None, 'User authorized print mode']:
+            stderr = io.StringIO()
+            with self.subTest(reason=reason), patch.object(cr, 'tmux') as tmux, contextlib.redirect_stderr(stderr), self.assertRaises(SystemExit):
+                self.prepare(prepare_only=False, no_rc_reason=reason)
+            self.assertIn('PERMISSION_MODE_UNSUPPORTED', stderr.getvalue())
+            tmux.assert_not_called()
+            self.assertFalse((self.root / 'runs').exists())
+
+    def test_unrecognized_help_is_not_support_evidence(self):
+        for help_text in ['--remote-control --session-id',
+                          '--remote-control --session-id\n'
+                          '  --permission-mode <mode> Mode\n'
+                          '  -o, --output-format <format> (choices: "auto")']:
+            self.set_cli_help(help_text)
+            stderr = io.StringIO()
+            with contextlib.redirect_stderr(stderr), self.assertRaises(SystemExit):
+                self.prepare()
+            self.assertIn('PERMISSION_MODE_UNVERIFIED', stderr.getvalue())
+            self.assertFalse((self.root / 'runs').exists())
+
+    def test_resume_rechecks_cli_permission_support(self):
+        directory = self.prepare()
+        (directory / 'exit.json').write_text('{"exit_code": 0}')
+        self.set_cli_help('--remote-control --session-id\n'
+                          '  --permission-mode <mode> (choices: "manual")')
+        args = ['claude_run.py', 'resume', '--from', str(directory), '--mission', str(self.mission), '--prepare-only']
+        stderr = io.StringIO()
+        with patch('sys.argv', args), patch.object(cr, 'session_processes', return_value=[]), contextlib.redirect_stderr(stderr), self.assertRaises(SystemExit):
+            cr.main()
+        self.assertIn('PERMISSION_MODE_UNSUPPORTED', stderr.getvalue())
+        self.assertEqual(list((self.root / 'runs').glob('resume-*')), [])
 
     def test_print_requires_explicit_reason(self):
         directory = self.prepare(no_rc_reason='User requested a single offline print run')
@@ -148,9 +204,11 @@ class RemoteControlTests(unittest.TestCase):
         self.assertIn('mission.md', (directory / 'run.sh').read_text())
 
     def test_unsupported_rc_does_not_fall_back(self):
-        self.cli.write_text('#!/bin/sh\necho old-version\n')
-        with self.assertRaises(SystemExit):
+        self.set_cli_help('  --permission-mode <mode> (choices: "auto")')
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr), self.assertRaises(SystemExit):
             self.prepare()
+        self.assertIn('RC_UNSUPPORTED', stderr.getvalue())
         self.assertFalse((self.root / 'runs').exists())
 
     def test_permission_and_env_guards(self):

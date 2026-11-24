@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 — 2026-11-24
+
+- Focus Codex on product scenarios and business acceptance while Claude owns architecture, implementation and its required technical review/verify loop.
+- Add optional per-team sub-PM coordination with a persistent main Claude conversation, a sole dispatch owner and explicit ownership handover.
+- Add Claude-designer defaults, scoped design resets, optional immutable asset handoffs, loaded-skill selection and evidence-based requested remote archive guidance.
+- Update mission/handoff/ledger templates and bilingual usage examples; preserve configurable model/effort/account policy and the mandatory full harness without private skill dependencies.
+- Validate the requested permission mode against the installed CLI on every launch/resume and record supported choices. Unsupported modes or unrecognized help stop before run creation; no silent fallback.
+
 ## 0.3.0 — 2026-11-20
 
 - Add opt-in user-configured stage and quota model selection shared by launch/resume, with explicit overrides and legacy fallback.
